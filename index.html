@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小小咖啡屋</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Arial Rounded MT Bold', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5d7bf 0%, #e8c4a4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background-color: #f9f3e9;
+            border-radius: 30px;
+            box-shadow: 0 15px 30px rgba(139, 69, 19, 0.3);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 标题样式 */
+        .title-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to right, #8B4513, #A0522D);
+            color: #FFEBC1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            border-bottom: 5px solid #5D2906;
+        }
+        
+        /* 侧边提示框 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #D2B48C 0%, #A67B5B 100%);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            border-right: 5px solid #8B4513;
+        }
+        
+        .sidebar::before {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 30px;
+            background: #8B4513;
+            border-radius: 50%;
+            z-index: -1;
+        }
+        
+        .coffee-icon {
+            width: 100px;
+            height: 100px;
+            background: #4B3621;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0 20px;
+            border: 5px solid #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .coffee-icon span {
+            font-size: 60px;
+            color: #FFD700;
+        }
+        
+        .prompt-box {
+            background: #FFEBC1;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            width: 100%;
+            min-height: 120px;
+            border: 3px solid #8B4513;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .prompt-box::after {
+            content: "";
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 20px 15px 0;
+            border-style: solid;
+            border-color: #FFEBC1 transparent transparent;
+        }
+        
+        .prompt-text {
+            font-size: 22px;
+            color: #5D2906;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        
+        .character {
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .character img {
+            width: 150px;
+            height: auto;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+        
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* 内容容器（可滚动区域） */
+        .content-scrollable {
+            flex: 1;
+            padding: 100px 30px 30px; /* 顶部内边距留出标题空间 */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* 咖啡吧台样式 */
+        .coffee-bar {
+            width: 100%;
+            max-width: 800px;
+            background: linear-gradient(to bottom, #8B4513 0%, #5D2906 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 8px solid #D2B48C;
+            position: relative;
+            min-height: 400px;
+        }
+        
+        .coffee-bar::before {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 30px;
+            right: 30px;
+            height: 30px;
+            background: #D2B48C;
+            border-radius: 50%;
+        }
+        
+        /* 咖啡卡片容器 */
+        .coffee-cards, .option-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-top: 20px;
+            padding-bottom: 10px; /* 添加底部内边距 */
+        }
+        
+        /* 咖啡卡片样式 */
+        .coffee-card {
+            background: linear-gradient(135deg, #FFEBC1 0%, #F5D7BF 100%);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #A67B5B;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .coffee-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(139, 69, 19, 0.4);
+            border-color: #FFD700;
+        }
+        
+        .coffee-card.selected {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-color: #8B4513;
+            transform: scale(1.05);
+        }
+        
+        .selected-indicator {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 30px;
+            height: 30px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+        
+        .coffee-icon-small {
+            width: 70px;
+            height: 70px;
+            background: #4B3621;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 3px solid #FFD700;
+        }
+        
+        .coffee-icon-small span {
+            font-size: 30px;
+            color: #FFD700;
+        }
+        
+        .coffee-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #5D2906;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .coffee-price {
+            font-size: 16px;
+            color: #8B4513;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        /* 选项卡片样式 */
+        .option-card {
+            background: linear-gradient(135deg, #FFEBC1 0%, #F5D7BF 100%);
+            border-radius: 15px;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #A67B5B;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(139, 69, 19, 0.3);
+        }
+        
+        .option-card.selected {
+            background: linear-gradient(135deg, #87CEEB 0%, #6495ED 100%);
+            border-color: #4169E1;
+        }
+        
+        .option-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #5D2906;
+            text-align: center;
+        }
+        
+        /* 结算表单样式 */
+        .order-summary {
+            background: #FFEBC1;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            border: 5px solid #8B4513;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .order-title {
+            text-align: center;
+            color: #8B4513;
+            font-size: 28px;
+            margin-bottom: 25px;
+            text-decoration: underline;
+            text-underline-offset: 8px;
+        }
+        
+        .order-detail {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f3e9;
+            border-radius: 15px;
+            border-left: 5px solid #A67B5B;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #A67B5B;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .coffee-order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #A67B5B;
+        }
+        
+        .item-label {
+            font-weight: bold;
+            color: #5D2906;
+        }
+        
+        .item-value {
+            color: #8B4513;
+            font-weight: bold;
+        }
+        
+        .total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 3px double #8B4513;
+            font-size: 24px;
+            font-weight: bold;
+            color: #5D2906;
+        }
+        
+        /* 底部按钮 */
+        .bottom-bar {
+            height: 80px;
+            background: linear-gradient(to right, #8B4513, #A0522D);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            padding: 0 20px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(to bottom, #FFD700, #FFA500);
+            color: #5D2906;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 60px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 3px solid #FFEBC1;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(to bottom, #FFA500, #FF8C00);
+        }
+        
+        .action-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 步骤指示器 */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+            padding-bottom: 20px; /* 增加底部空间 */
+        }
+        
+        .step {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #D2B48C;
+            border: 2px solid #8B4513;
+        }
+        
+        .step.active {
+            background-color: #8B4513;
+        }
+        
+        /* 已选咖啡列表 */
+        .selected-coffees {
+            background: rgba(255, 235, 193, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+            border: 3px solid #A67B5B;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+        
+        .selected-title {
+            text-align: center;
+            color: #8B4513;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .selected-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .selected-item {
+            background: #f9f3e9;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 16px;
+            color: #5D2906;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 5px solid #8B4513;
+            }
+            
+            .content-scrollable {
+                padding: 30px 20px 30px;
+            }
+            
+            .coffee-cards, .option-cards {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            .action-btn {
+                padding: 12px 40px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title-bar">
+            小小咖啡屋
+        </div>
+        
+        <div class="sidebar">
+            <div class="coffee-icon">
+                <span>☕</span>
+            </div>
+            <div class="prompt-box">
+                <div class="prompt-text">您好，想要喝点什么?</div>
+            </div>
+            <div class="character">
+                <span style="font-size: 80px;">👩‍🍳</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="content-scrollable">
+                <!-- 已选咖啡列表 -->
+                <div class="selected-coffees" id="selectedCoffees">
+                    <div class="selected-title">已选咖啡</div>
+                    <div class="selected-list" id="selectedList"></div>
+                </div>
+                
+                <!-- 初始页面：咖啡选择 -->
+                <div class="coffee-bar" id="coffeeSelection">
+                    <h2 style="color: #FFEBC1; text-align: center; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">咖啡种类 (可多选)</h2>
+                    <div class="coffee-cards">
+                        <div class="coffee-card" data-coffee="冰美式" data-price="18">
+                            <div class="coffee-icon-small">
+                                <span>❄️</span>
+                            </div>
+                            <div class="coffee-name">冰美式</div>
+                            <div class="coffee-price">¥18</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="黑咖啡" data-price="16">
+                            <div class="coffee-icon-small">
+                                <span>☕</span>
+                            </div>
+                            <div class="coffee-name">黑咖啡</div>
+                            <div class="coffee-price">¥16</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="拿铁" data-price="22">
+                            <div class="coffee-icon-small">
+                                <span>🥛</span>
+                            </div>
+                            <div class="coffee-name">拿铁</div>
+                            <div class="coffee-price">¥22</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="卡布奇诺" data-price="24">
+                            <div class="coffee-icon-small">
+                                <span>🍂</span>
+                            </div>
+                            <div class="coffee-name">卡布奇诺</div>
+                            <div class="coffee-price">¥24</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="橙C美式" data-price="20">
+                            <div class="coffee-icon-small">
+                                <span>🍊</span>
+                            </div>
+                            <div class="coffee-name">橙C美式</div>
+                            <div class="coffee-price">¥20</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="柠檬水" data-price="12">
+                            <div class="coffee-icon-small">
+                                <span>🍋</span>
+                            </div>
+                            <div class="coffee-name">柠檬水</div>
+                            <div class="coffee-price">¥12</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="抹茶拿铁" data-price="25">
+                            <div class="coffee-icon-small">
+                                <span>🍵</span>
+                            </div>
+                            <div class="coffee-name">抹茶拿铁</div>
+                            <div class="coffee-price">¥25</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="杨枝甘露" data-price="26">
+                            <div class="coffee-icon-small">
+                                <span>🥭</span>
+                            </div>
+                            <div class="coffee-name">杨枝甘露</div>
+                            <div class="coffee-price">¥26</div>
+                        </div>
+                        <!-- 添加更多咖啡选项 -->
+                        <div class="coffee-card" data-coffee="焦糖玛奇朵" data-price="25">
+                            <div class="coffee-icon-small">
+                                <span>🍮</span>
+                            </div>
+                            <div class="coffee-name">焦糖玛奇朵</div>
+                            <div class="coffee-price">¥25</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="香草拿铁" data-price="24">
+                            <div class="coffee-icon-small">
+                                <span>🌿</span>
+                            </div>
+                            <div class="coffee-name">香草拿铁</div>
+                            <div class="coffee-price">¥24</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="摩卡" data-price="26">
+                            <div class="coffee-icon-small">
+                                <span>🍫</span>
+                            </div>
+                            <div class="coffee-name">摩卡</div>
+                            <div class="coffee-price">¥26</div>
+                        </div>
+                        <div class="coffee-card" data-coffee="冷萃咖啡" data-price="22">
+                            <div class="coffee-icon-small">
+                                <span>🧊</span>
+                            </div>
+                            <div class="coffee-name">冷萃咖啡</div>
+                            <div class="coffee-price">¥22</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 规格选择页面（初始隐藏） -->
+                <div class="coffee-bar" id="specSelection" style="display: none;">
+                    <h2 style="color: #FFEBC1; text-align: center; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);" id="specTitle">杯型选择</h2>
+                    <div class="option-cards" id="optionCards">
+                        <!-- 选项由JS动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 结算页面（初始隐藏） -->
+                <div class="order-summary" id="orderSummary" style="display: none;">
+                    <h2 class="order-title">您的订单</h2>
+                    <div class="order-detail">
+                        <div class="order-item">
+                            <span class="item-label">咖啡种类:</span>
+                            <div class="item-value" id="summaryCoffee">-</div>
+                        </div>
+                        <div class="order-item">
+                            <span class="item-label">杯型:</span>
+                            <span class="item-value" id="summarySize">-</span>
+                        </div>
+                        <div class="order-item">
+                            <span class="item-label">甜度:</span>
+                            <span class="item-value" id="summarySweetness">-</span>
+                        </div>
+                        <div class="order-item">
+                            <span class="item-label">温度:</span>
+                            <span class="item-value" id="summaryTemperature">-</span>
+                        </div>
+                        <div class="order-item">
+                            <span class="item-label">小料:</span>
+                            <span class="item-value" id="summaryToppings">-</span>
+                        </div>
+                        <div class="order-item">
+                            <span class="item-label">打包方式:</span>
+                            <span class="item-value" id="summaryPackaging">-</span>
+                        </div>
+                        <div class="order-item">
+                            <span class="item-label">吸管:</span>
+                            <span class="item-value" id="summaryStraw">-</span>
+                        </div>
+                    </div>
+                    <div class="total">
+                        <span class="item-label">总计:</span>
+                        <span class="item-value" id="summaryTotal">¥0</span>
+                    </div>
+                </div>
+                
+                <div class="step-indicator">
+                    <div class="step active"></div>
+                    <div class="step"></div>
+                    <div class="step"></div>
+                    <div class="step"></div>
+                    <div class="step"></div>
+                    <div class="step"></div>
+                    <div class="step"></div>
+                </div>
+            </div>
+            
+            <div class="bottom-bar">
+                <button class="action-btn" id="actionBtn">选好了</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 当前步骤状态管理
+        const state = {
+            step: 0, // 0=咖啡选择, 1=杯型, 2=甜度, 3=温度, 4=小料, 5=打包方式, 6=吸管, 7=结算
+            coffees: [], // 改为数组以支持多选
+            size: null,
+            sweetness: null,
+            temperature: null,
+            toppings: [], // 新增小料选项
+            packaging: null,
+            straw: null,
+            price: 0
+        };
+        
+        // 步骤配置
+        const steps = [
+            { title: "咖啡种类", next: "杯型选择" },
+            { title: "杯型选择", options: ["大杯", "中杯", "小杯"], next: "甜度选择" },
+            { title: "甜度选择", options: ["正常糖", "少糖", "少少糖", "无糖"], next: "温度选择" },
+            { title: "温度选择", options: ["少冰", "正常冰", "热", "常温"], next: "小料选择" },
+            // 新增小料选择步骤
+            { 
+                title: "小料选择", 
+                options: ["西米", "珍珠", "啵啵", "奶盖", "布丁", "奥利奥碎", "芋圆", "椰果"],
+                next: "打包方式" 
+            },
+            { title: "打包方式", options: ["打包/带走", "在这儿喝"], next: "吸管选择" },
+            { title: "吸管选择", options: ["要吸管", "不要吸管"], next: "结算" },
+            { title: "订单结算" }
+        ];
+        
+        // DOM元素
+        const coffeeSelection = document.getElementById('coffeeSelection');
+        const specSelection = document.getElementById('specSelection');
+        const orderSummary = document.getElementById('orderSummary');
+        const specTitle = document.getElementById('specTitle');
+        const optionCards = document.getElementById('optionCards');
+        const actionBtn = document.getElementById('actionBtn');
+        const promptText = document.querySelector('.prompt-text');
+        const stepsEl = document.querySelectorAll('.step');
+        const selectedCoffees = document.getElementById('selectedCoffees');
+        const selectedList = document.getElementById('selectedList');
+        
+        // 咖啡卡片选择 - 支持多选
+        document.querySelectorAll('.coffee-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const coffeeName = this.dataset.coffee;
+                const coffeePrice = parseInt(this.dataset.price);
+                const index = state.coffees.findIndex(item => item.name === coffeeName);
+                
+                if (index >= 0) {
+                    // 如果已经选中，则移除
+                    state.coffees.splice(index, 1);
+                    this.classList.remove('selected');
+                    this.querySelector('.selected-indicator')?.remove();
+                } else {
+                    // 如果未选中，则添加
+                    state.coffees.push({ name: coffeeName, price: coffeePrice });
+                    this.classList.add('selected');
+                    
+                    // 添加选中指示器
+                    const indicator = document.createElement('div');
+                    indicator.className = 'selected-indicator';
+                    indicator.textContent = state.coffees.length;
+                    this.appendChild(indicator);
+                }
+                
+                // 更新已选咖啡列表
+                updateSelectedList();
+                
+                // 显示/隐藏已选咖啡列表
+                selectedCoffees.style.display = state.coffees.length > 0 ? 'block' : 'none';
+            });
+        });
+        
+        // 更新已选咖啡列表
+        function updateSelectedList() {
+            selectedList.innerHTML = '';
+            state.coffees.forEach((coffee, index) => {
+                const item = document.createElement('div');
+                item.className = 'selected-item';
+                item.innerHTML = `
+                    <span>${coffee.name} (¥${coffee.price})</span>
+                    <button class="remove-btn" data-index="${index}">×</button>
+                `;
+                selectedList.appendChild(item);
+            });
+            
+            // 添加移除事件
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    state.coffees.splice(index, 1);
+                    
+                    // 更新咖啡卡片状态
+                    updateCoffeeCards();
+                    updateSelectedList();
+                    
+                    // 显示/隐藏已选咖啡列表
+                    selectedCoffees.style.display = state.coffees.length > 0 ? 'block' : 'none';
+                });
+            });
+        }
+        
+        // 更新咖啡卡片选中状态
+        function updateCoffeeCards() {
+            document.querySelectorAll('.coffee-card').forEach(card => {
+                const coffeeName = card.dataset.coffee;
+                const index = state.coffees.findIndex(item => item.name === coffeeName);
+                
+                if (index >= 0) {
+                    card.classList.add('selected');
+                    
+                    // 添加或更新选中指示器
+                    let indicator = card.querySelector('.selected-indicator');
+                    if (!indicator) {
+                        indicator = document.createElement('div');
+                        indicator.className = 'selected-indicator';
+                        card.appendChild(indicator);
+                    }
+                    indicator.textContent = index + 1;
+                } else {
+                    card.classList.remove('selected');
+                    card.querySelector('.selected-indicator')?.remove();
+                }
+            });
+        }
+        
+        // 生成选项卡片
+        function generateOptionCards(options) {
+            optionCards.innerHTML = '';
+            options.forEach(option => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.innerHTML = `
+                    <div class="option-name">${option}</div>
+                `;
+                
+                // 检查是否是小料选择步骤
+                const isToppingsStep = state.step === 4;
+                
+                card.addEventListener('click', function() {
+                    if (isToppingsStep) {
+                        // 小料选择支持多选
+                        const index = state.toppings.indexOf(option);
+                        if (index >= 0) {
+                            // 如果已经选中，则移除
+                            state.toppings.splice(index, 1);
+                            this.classList.remove('selected');
+                        } else {
+                            // 如果未选中，则添加
+                            state.toppings.push(option);
+                            this.classList.add('selected');
+                        }
+                    } else {
+                        // 其他选项为单选
+                        // 移除之前的选择
+                        document.querySelectorAll('.option-card').forEach(c => {
+                            c.classList.remove('selected');
+                        });
+                        
+                        // 设置当前选择
+                        this.classList.add('selected');
+                        
+                        // 更新状态
+                        switch(state.step) {
+                            case 1: state.size = option; break;
+                            case 2: state.sweetness = option; break;
+                            case 3: state.temperature = option; break;
+                            case 5: state.packaging = option; break;
+                            case 6: state.straw = option; break;
+                        }
+                    }
+                });
+                
+                // 设置初始选中状态
+                if (isToppingsStep && state.toppings.includes(option)) {
+                    card.classList.add('selected');
+                } else if (!isToppingsStep) {
+                    switch(state.step) {
+                        case 1: if (state.size === option) card.classList.add('selected'); break;
+                        case 2: if (state.sweetness === option) card.classList.add('selected'); break;
+                        case 3: if (state.temperature === option) card.classList.add('selected'); break;
+                        case 5: if (state.packaging === option) card.classList.add('selected'); break;
+                        case 6: if (state.straw === option) card.classList.add('selected'); break;
+                    }
+                }
+                
+                optionCards.appendChild(card);
+            });
+        }
+        
+        // 更新步骤指示器
+        function updateStepIndicator() {
+            stepsEl.forEach((step, index) => {
+                if (index <= state.step) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+        
+        // 处理下一步操作
+        actionBtn.addEventListener('click', function() {
+            // 验证当前步骤是否完成
+            if (state.step === 0 && state.coffees.length === 0) {
+                alert('请至少选择一种咖啡');
+                return;
+            }
+            
+            if (state.step >= 1 && state.step <= 6) {
+                let selected;
+                switch(state.step) {
+                    case 1: selected = state.size; break;
+                    case 2: selected = state.sweetness; break;
+                    case 3: selected = state.temperature; break;
+                    case 4: selected = state.toppings.length > 0; break; // 小料可选
+                    case 5: selected = state.packaging; break;
+                    case 6: selected = state.straw; break;
+                }
+                
+                // 小料步骤不需要强制选择
+                if (state.step !== 4 && !selected) {
+                    alert(`请选择${steps[state.step].title}`);
+                    return;
+                }
+            }
+            
+            // 进入下一步
+            state.step++;
+            
+            // 更新UI
+            updateUI();
+        });
+        
+        // 更新UI显示
+        function updateUI() {
+            // 更新步骤指示器
+            updateStepIndicator();
+            
+            // 根据步骤显示不同内容
+            if (state.step === 0) {
+                // 咖啡选择
+                coffeeSelection.style.display = 'block';
+                specSelection.style.display = 'none';
+                orderSummary.style.display = 'none';
+                promptText.textContent = '您好，想要喝点什么？';
+                actionBtn.textContent = '选好了';
+                selectedCoffees.style.display = state.coffees.length > 0 ? 'block' : 'none';
+            } else if (state.step <= 6) {
+                // 规格选择
+                coffeeSelection.style.display = 'none';
+                specSelection.style.display = 'block';
+                orderSummary.style.display = 'none';
+                selectedCoffees.style.display = 'none';
+                
+                // 设置规格标题
+                specTitle.textContent = steps[state.step].title;
+                
+                // 生成选项卡片
+                generateOptionCards(steps[state.step].options);
+                
+                // 更新提示
+                if (state.step === 4) {
+                    promptText.textContent = '请选择小料（可多选），然后点击"选好了"';
+                } else {
+                    promptText.textContent = `请选择${steps[state.step].title}，然后点击"选好了"`;
+                }
+                
+                // 更新按钮文本
+                if (state.step === 6) {
+                    actionBtn.textContent = '完成订单';
+                } else {
+                    actionBtn.textContent = '选好了';
+                }
+            } else if (state.step === 7) {
+                // 结算页面
+                coffeeSelection.style.display = 'none';
+                specSelection.style.display = 'none';
+                orderSummary.style.display = 'block';
+                selectedCoffees.style.display = 'none';
+                promptText.textContent = '您的订单已完成，感谢光临小小咖啡屋！';
+                actionBtn.textContent = '重新点餐';
+                
+                // 更新结算信息
+                const coffeeList = state.coffees.map(coffee => 
+                    `${coffee.name} (¥${coffee.price})`
+                ).join('<br>');
+                
+                document.getElementById('summaryCoffee').innerHTML = coffeeList;
+                document.getElementById('summarySize').textContent = state.size || '-';
+                document.getElementById('summarySweetness').textContent = state.sweetness || '-';
+                document.getElementById('summaryTemperature').textContent = state.temperature || '-';
+                document.getElementById('summaryToppings').textContent = state.toppings.length > 0 ? state.toppings.join(', ') : '-';
+                document.getElementById('summaryPackaging').textContent = state.packaging || '-';
+                document.getElementById('summaryStraw').textContent = state.straw || '-';
+                
+                // 计算总价
+                let totalPrice = 0;
+                state.coffees.forEach(coffee => {
+                    totalPrice += coffee.price;
+                });
+                
+                // 根据杯型调整价格
+                if (state.size === '大杯') totalPrice += 5 * state.coffees.length;
+                if (state.size === '小杯') totalPrice -= 3 * state.coffees.length;
+                
+                // 小料加价（每份小料加2元）
+                totalPrice += state.toppings.length * 2;
+                
+                document.getElementById('summaryTotal').textContent = `¥${totalPrice}`;
+            } else {
+                // 重新开始
+                resetOrder();
+            }
+        }
+        
+        // 重置订单
+        function resetOrder() {
+            state.step = 0;
+            state.coffees = [];
+            state.size = null;
+            state.sweetness = null;
+            state.temperature = null;
+            state.toppings = [];
+            state.packaging = null;
+            state.straw = null;
+            state.price = 0;
+            
+            // 清除选择
+            document.querySelectorAll('.coffee-card').forEach(c => {
+                c.classList.remove('selected');
+                c.querySelector('.selected-indicator')?.remove();
+            });
+            
+            document.querySelectorAll('.option-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            selectedCoffees.style.display = 'none';
+            updateUI();
+        }
+        
+        // 初始化
+        updateUI();
+    </script>
+</body>
+</html>
